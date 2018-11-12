@@ -1,2 +1,6 @@
 CMAPSSData.zip
 Challenge_Data.zip
+git
+.ipynb_checkpoints
+
+*.pyc
