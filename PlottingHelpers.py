@@ -1,8 +1,21 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-
+import ProcessingHelpers
+import seaborn as sns
 import colorsys
+
+def plot_grouped_by_RUL(df_sub, leg=True):
+
+    cols = [col for col in df_sub.columns if len(df_sub[col].unique()) > 2]
+    cols_data = [col for col in cols if col.startswith('sen') or col.startswith('os')]
+
+    g = sns.PairGrid(data=df_sub, x_vars="RUL", y_vars=cols_data,hue="unit_nr", height=2, aspect=6,)
+    g = g.map(plt.plot, alpha=0.5)
+    g = g.set(xlim=(df_sub['RUL'].max(),df_sub['RUL'].min()))
+    if leg:
+        g = g.add_legend()
+
 
 def plot_rolling_by_unit(df_sub):
     nrs = df_sub['unit_nr'].unique()[:5]
@@ -43,21 +56,26 @@ def plot_imshow(df, resample=True):
     axes = axes.flatten()
 
     m = len(df['unit_nr'].unique())
-    n = 2 * m if resample else: df['time'].values.max()
+
+    if resample:
+        n = 3 * m
+    else:
+        n = int(df['time'].values.max())
 
     t = np.linspace(0, 1, m)
-    dc_tmp = dict([ ( col, np.zeros((m, n)) ) for col in cols_data ])
+    dc_tmp = dict([(col, np.zeros((m, n))) for col in cols_data])
 
-    for nr, d in df.groupby('unit_nr'):
+    for i, (nr, d) in enumerate(df.groupby('unit_nr')):
         tmp = ProcessingHelpers.resample_fixed(d, n) if resample else d
 
         for ax, col in zip(axes, cols_data):
             v = np.zeros((1, n))
             v[:] = np.nan
-            v[0, (n - len(d)):] = tmp[col].values
-            dc_tmp[col][nr - 1, :] = v
+            v[0, (n - len(tmp)):] = tmp[col].values
+            dc_tmp[col][i, :] = v
 
     for ax, col in zip(axes, cols_data):
+
         mat = dc_tmp[col]
         ax.imshow(mat)
         ax.set_ylabel(col)
