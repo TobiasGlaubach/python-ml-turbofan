@@ -10,7 +10,7 @@ def apply_filtfilt_by_unit(df, b, a=1.0):
         n = len(df_sub)            
         for col in df_sub.columns:
             if col.startswith('s'):
-                df_sub[col] = filtfilt(b, a, df_sub[col].values, padlen=5 * len(b))
+                df_sub[col] = filtfilt(b, a, df_sub[col].copy().values, padlen=5 * len(b))
         df_new = df_new.append(df_sub)
         
     return df_new

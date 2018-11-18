@@ -5,10 +5,11 @@ import ProcessingHelpers
 import seaborn as sns
 import colorsys
 
-def plot_grouped_by_RUL(df_sub, leg=True):
+def plot_grouped_by_RUL(df_sub, leg=True, cols_data=None):
 
-    cols = [col for col in df_sub.columns if len(df_sub[col].unique()) > 2]
-    cols_data = [col for col in cols if col.startswith('sen') or col.startswith('os')]
+    if cols_data is None: 
+        cols = [col for col in df_sub.columns if len(df_sub[col].unique()) > 2]
+        cols_data = [col for col in cols if col.startswith('sen') or col.startswith('os')]
 
     g = sns.PairGrid(data=df_sub, x_vars="RUL", y_vars=cols_data,hue="unit_nr", height=2, aspect=6,)
     g = g.map(plt.plot, alpha=0.5)
