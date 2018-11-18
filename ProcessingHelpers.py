@@ -1,5 +1,19 @@
 import numpy as np
 import pandas as pd
+from scipy.signal import filtfilt
+
+def apply_filtfilt_by_unit(df, b, a=1.0):
+    cols_data = [col for col in df.columns if col.startswith('sen') or col.startswith('os')]
+    df_new = pd.DataFrame(columns=df.columns)
+    
+    for unit_nr, df_sub in df.groupby('unit_nr'):
+        n = len(df_sub)            
+        for col in df_sub.columns:
+            if col.startswith('s'):
+                df_sub[col] = filtfilt(b, a, df_sub[col].values, padlen=5 * len(b))
+        df_new = df_new.append(df_sub)
+        
+    return df_new
 
 def apply_rolling_by_unit(df, fun, win_size_p=0.05, subsample=0):
     cols_data = [col for col in df.columns if col.startswith('sen') or col.startswith('os')]
