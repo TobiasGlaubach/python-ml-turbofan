@@ -2,6 +2,18 @@ import numpy as np
 import pandas as pd
 from scipy.signal import filtfilt
 
+def rolling_mean_by_unit(df, n, verbose=False):
+    cols_sensors = [c for c in df.columns if c.startswith('sensor')]
+    df_new = df.copy()
+    unit_nrs = df['unit_nr'].unique()
+    
+    for nr in unit_nrs:
+        if verbose:
+            print('processing unit nr: {}'.format(nr))
+        idx = df['unit_nr'] == nr
+        df_new.loc[idx,cols_sensors] = df.loc[idx, cols_sensors].rolling(n, min_periods=1).mean()
+    return df_new
+
 def apply_filtfilt_by_unit(df, b, a=1.0):
     cols_data = [col for col in df.columns if col.startswith('sen') or col.startswith('os')]
     df_new = pd.DataFrame(columns=df.columns)
